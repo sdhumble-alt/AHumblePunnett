@@ -181,6 +181,10 @@ canvas{max-width:100%;height:auto;display:block;}
           </div>
           <div class="opt-group-body">
             <div id="traitNamesContainer"></div>
+            <div class="toggle-row" style="margin-top:8px;">
+              <input type="checkbox" id="showTraitKeyBox" checked onchange="triggerLiveUpdate()">
+              <label for="showTraitKeyBox" style="font-weight:600;">Show Trait Key on Square</label>
+            </div>
             <div class="info-note">Leave blank for standard names, or type custom traits.</div>
           </div>
         </div>
@@ -797,6 +801,66 @@ function drawTokens(ctx, tokens, centerX, centerY, baseFontSize, color = '#1e2a3
   });
 }
 
+function getTraitLegendEntries() {
+  const complexity = document.getElementById('crossComplexity').value;
+  const isDi = complexity === 'dihybrid';
+  const entries = [];
+
+  function buildLocusEntries(prefix, pattern, isSex, gIdx) {
+    const customDom = document.getElementById(`${prefix}_dom`)?.value.trim();
+    const customRec = document.getElementById(`${prefix}_rec`)?.value.trim();
+    const customBlend = document.getElementById(`${prefix}_blend`)?.value.trim();
+
+    if (!customDom && !customRec && !customBlend) return;
+
+    const b0 = document.getElementById(`p1Boxes_b${gIdx * 2}`)?.value.trim();
+    const b1 = document.getElementById(`p1Boxes_b${gIdx * 2 + 1}`)?.value.trim();
+    const b2 = document.getElementById(`p2Boxes_b${gIdx * 2}`)?.value.trim();
+    const b3 = document.getElementById(`p2Boxes_b${gIdx * 2 + 1}`)?.value.trim();
+
+    const uniqueRaw = [...new Set([b0, b1, b2, b3].filter(Boolean))];
+    const units = uniqueRaw.map(parseSingleAllele).sort(compareAlleleUnits);
+
+    const domUnit = units.find(u => !u.isY && (u.script.toUpperCase() === u.script || u.base.toUpperCase() === u.base));
+    const recUnit = units.find(u => !u.isY && u !== domUnit);
+
+    const domSymbol = domUnit ? domUnit.raw : (isSex ? 'X^A' : (gIdx === 0 ? 'A' : 'B'));
+    const recSymbol = recUnit ? recUnit.raw : (isSex ? 'X^a' : (gIdx === 0 ? 'a' : 'b'));
+
+    if (isSex) {
+      if (customDom) entries.push({ symbol: domSymbol, text: customDom });
+      if (customRec) entries.push({ symbol: recSymbol, text: customRec });
+    } else if (pattern === 'incomplete') {
+      if (customDom) entries.push({ symbol: domSymbol + domSymbol, text: customDom });
+      if (customBlend) entries.push({ symbol: domSymbol + recSymbol, text: customBlend });
+      if (customRec) entries.push({ symbol: recSymbol + recSymbol, text: customRec });
+    } else if (pattern === 'codominant') {
+      if (customDom) entries.push({ symbol: domSymbol, text: customDom });
+      if (customRec) entries.push({ symbol: recSymbol, text: customRec });
+      if (customBlend) entries.push({ symbol: domSymbol + recSymbol, text: customBlend });
+    } else {
+      if (customDom) entries.push({ symbol: domSymbol, text: customDom });
+      if (customRec) entries.push({ symbol: recSymbol, text: customRec });
+    }
+  }
+
+  if (!isDi) {
+    const monoPattern = document.getElementById('monoInheritType').value;
+    const monoSex = document.getElementById('monoSexLinked').checked;
+    buildLocusEntries('tMono', monoPattern, monoSex, 0);
+  } else {
+    const diP1 = document.getElementById('diInheritGene1').value;
+    const diSex1 = document.getElementById('diSexLinkedGene1').checked;
+    const diP2 = document.getElementById('diInheritGene2').value;
+    const diSex2 = document.getElementById('diSexLinkedGene2').checked;
+
+    buildLocusEntries('tDi1', diP1, diSex1, 0);
+    buildLocusEntries('tDi2', diP2, diSex2, 1);
+  }
+
+  return entries;
+}
+
 function renderAll() {
   const complexity = document.getElementById('crossComplexity').value;
   const isDi = complexity === 'dihybrid';
@@ -820,6 +884,7 @@ function renderAll() {
   const showPhenos = document.getElementById('showPhenotypeRatios').checked;
   const showZero = document.getElementById('showZeroOutcomes').checked;
   const showSeparator = document.getElementById('showAxisSeparator').checked;
+  const showTraitKey = document.getElementById('showTraitKeyBox').checked;
 
   const topGametes = getGameteUnits('p1Boxes', isDi);
   const leftGametes = getGameteUnits('p2Boxes', isDi);
@@ -932,14 +997,23 @@ function renderAll() {
     }
   }
 
-  // 1. RENDER PUNNETT SQUARE CANVAS (Adaptive for Custom Parent Labels)
+  // 1. RENDER PUNNETT SQUARE CANVAS (Adaptive for Custom Parent Labels & Trait Key Box)
   const pCanvas = document.getElementById('punnettCanvas');
   const pCtx = pCanvas.getContext('2d');
   
   const padT = p1CustomLabel ? 36 : 18;
   const padL = p2CustomLabel ? 36 : 18;
-  const padB = 18;
   const padR = 18;
+  let padB = 18;
+
+  const traitEntries = showTraitKey ? getTraitLegendEntries() : [];
+  let keyBoxHeight = 0;
+  if (traitEntries.length > 0) {
+    const numCols = traitEntries.length > 3 ? 2 : 1;
+    const numRows = Math.ceil(traitEntries.length / numCols);
+    keyBoxHeight = 26 + (numRows * 18) + 8;
+    padB += keyBoxHeight + 12;
+  }
 
   pCanvas.width = squareDim + padL + padR;
   pCanvas.height = squareDim + padT + padB;
@@ -982,7 +1056,6 @@ function renderAll() {
 
     const halfExt = headerSize * 0.5;
 
-    // Vertical divider extensions (from square boundary upwards by half the header height)
     for (let c = 1; c < gridSize; c++) {
       const lineX = ox + headerSize + (c * cellSize);
       pCtx.beginPath();
@@ -991,7 +1064,6 @@ function renderAll() {
       pCtx.stroke();
     }
 
-    // Horizontal divider extensions (from square boundary leftwards by half the header width)
     for (let r = 1; r < gridSize; r++) {
       const lineY = oy + headerSize + (r * cellSize);
       pCtx.beginPath();
@@ -1030,6 +1102,49 @@ function renderAll() {
         drawTokens(pCtx, combined.tokens, x + (cellSize / 2), y + (cellSize / 2), isDi ? 13.5 : 20, '#111827');
       }
     }
+  }
+
+  // Render Trait Key Box below Square
+  if (traitEntries.length > 0) {
+    pCtx.save();
+    const kx = ox + headerSize;
+    const ky = oy + squareDim + 12;
+    const kw = gridSize * cellSize;
+    const kh = keyBoxHeight;
+
+    pCtx.fillStyle = '#f8fafc';
+    pCtx.fillRect(kx, ky, kw, kh);
+    pCtx.strokeStyle = '#cbd5e1';
+    pCtx.lineWidth = 1;
+    pCtx.strokeRect(kx, ky, kw, kh);
+
+    pCtx.fillStyle = '#475569';
+    pCtx.font = 'bold 9.5px system-ui, -apple-system, sans-serif';
+    pCtx.textAlign = 'left';
+    pCtx.textBaseline = 'top';
+    pCtx.fillText('TRAIT KEY:', kx + 8, ky + 6);
+
+    const numCols = traitEntries.length > 3 ? 2 : 1;
+    const colWidth = (kw - 16) / numCols;
+
+    traitEntries.forEach((entry, idx) => {
+      const col = idx % numCols;
+      const row = Math.floor(idx / numCols);
+      const itemX = kx + 10 + (col * colWidth);
+      const itemY = ky + 22 + (row * 18);
+
+      const symTokens = parseSingleAllele(entry.symbol).tokens;
+      drawTokens(pCtx, symTokens, itemX + 12, itemY + 2, 10.5, '#1e2a3a');
+
+      pCtx.fillStyle = '#334155';
+      pCtx.font = '10px system-ui, -apple-system, sans-serif';
+      pCtx.textAlign = 'left';
+      pCtx.textBaseline = 'middle';
+      const symW = measureTokens(pCtx, symTokens, 10.5);
+      pCtx.fillText(`= ${entry.text}`, itemX + 12 + symW / 2 + 5, itemY + 2);
+    });
+
+    pCtx.restore();
   }
 
   // 2. RENDER SEPARATE SOLUTION BREAKDOWN CANVAS
