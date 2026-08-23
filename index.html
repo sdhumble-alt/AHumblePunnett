@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A Humble Punnett Square</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/webfont/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:11pt;background:#f0f2f5;color:#1e2a3a;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+#app{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;background:#fff;}
+
+/* Top Header */
+#app-header{background:#1e2a3a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #12202e;}
+.header-titles{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;}
+#app-title{font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:bold;color:#fff;letter-spacing:0.01em;white-space:nowrap;line-height:1.2;margin:0;padding:0;}
+#app-subtitle{font-size:10px;color:rgba(255,255,255,0.65);font-style:italic;white-space:nowrap;line-height:1.2;margin:0;padding:0;}
+.toolbar-ver{font-size:8pt;color:rgba(255,255,255,0.4);font-family:Arial,sans-serif;white-space:nowrap;margin-left:16px;}
+
+/* Split Layout */
+.content{display:flex;flex:1;overflow:hidden;}
+.split-layout{display:grid;grid-template-columns:minmax(360px,430px) 1fr;gap:20px;height:100%;width:100%;overflow:hidden;align-items:stretch;padding:16px;}
+.split-left{height:100%;overflow-y:auto;padding-right:6px;}
+.split-right{height:100%;overflow-y:auto;background:#f9fafc;border:1px solid #d0d7e2;border-radius:8px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:24px;}
+
+/* Cards & Option Groups */
+.opt-group{border:1px solid #bbbbbb;border-radius:8px;margin-bottom:14px;overflow:hidden;background:#ffffff;}
+.opt-group-header{background:#f5f5f5;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #cccccc;}
+.opt-group-header-left{display:flex;align-items:center;gap:6px;}
+.opt-group-header i{font-size:14px;color:#666;}
+.opt-group-title{font-size:9pt;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;}
+.opt-group-body{padding:12px;}
+
+/* Inputs & Form Elements */
+input[type=text],select{border:1.5px solid #aaaaaa;border-radius:6px;padding:6px 9px;font-size:10.5pt;font-family:Arial,sans-serif;background:#ffffff;color:#222222;outline:none;transition:border-color .15s,box-shadow .15s;min-width:0;width:100%;box-sizing:border-box;}
+input[type=text]:hover,select:hover{border-color:#777777;}
+input[type=text]:focus,select:focus{border-color:#3266ad;border-width:2px;box-shadow:0 0 0 3px rgba(50,102,173,0.15);}
+.field-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.field-row label{font-size:10pt;color:#555555;font-weight:600;}
+.field-row input,.field-row select{width:100%;}
+.toggle-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.toggle-row label{font-size:10.5pt;color:#222;cursor:pointer;}
+input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:#3266ad;}
+
+/* Color Picker Component */
+.color-picker-custom{position:relative;display:inline-block;flex-shrink:0;}
+.color-trigger{width:28px;height:20px;border:1px solid #c8d0dc;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;padding:0 2px;background:#fff;}
+.color-trigger .arrow{width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-top:4px solid rgba(0,0,0,0.6);}
+.color-menu{display:none;position:absolute;top:calc(100% + 3px);right:0;z-index:100;background:#fff;border:1px solid #c8d0dc;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:6px;width:122px;}
+.color-menu.open{display:block;}
+.color-palette-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:6px;}
+.color-palette-swatch{width:22px;height:22px;border-radius:3px;cursor:pointer;border:1px solid rgba(0,0,0,0.15);transition:transform 0.05s;}
+.color-palette-swatch:hover{transform:scale(1.15);border-color:#1e2a3a;}
+.custom-hex-btn{width:100%;padding:4px 6px;font-size:10px;font-weight:500;border:1px solid #c8d0dc;border-radius:4px;background:#f4f6f9;cursor:pointer;text-align:center;color:#1e2a3a;display:block;}
+.custom-hex-btn:hover{background:#e5e9f0;}
+
+/* Multi-box allele grid */
+.allele-boxes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;}
+.allele-box-wrap{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.allele-box-wrap .sub-lbl{font-size:8.5pt;color:#666;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.info-note{font-size:8.5pt;color:#666;margin-top:6px;font-style:italic;}
+
+/* Trait naming grid */
+.trait-inputs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;margin-bottom:8px;}
+.trait-inputs-grid .t-box{display:flex;flex-direction:column;gap:2px;}
+.trait-inputs-grid .t-box span{font-size:8pt;color:#666;font-weight:600;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:6px 12px;font-size:9.5pt;font-family:Arial,sans-serif;font-weight:600;cursor:pointer;transition:all .12s;border:none;}
+.btn-primary{background:#3266ad;color:#fff;}
+.btn-primary:hover{background:#185fa5;}
+.btn-green{background:#1a7a3a;color:#fff;}
+.btn-green:hover{background:#145e2c;}
+.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;justify-content:center;}
+
+/* Preview Containers */
+.export-card{background:#ffffff;border:1px solid #d0d7e2;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:center;max-width:100%;}
+.export-card-title{font-size:10pt;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+canvas{max-width:100%;height:auto;display:block;}
+.copy-feedback{font-size:9.5pt;color:#2e7d32;font-weight:600;display:none;align-items:center;gap:4px;margin-top:6px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <input type="color" id="hidden-custom-color" style="position:fixed; top:-100px; left:-100px; opacity:0; pointer-events:none;">
+
+  <!-- TOP HEADER -->
+  <div id="app-header">
+    <div class="header-titles">
+      <div id="app-title">A Humble Punnett Square</div>
+      <div id="app-subtitle">A Clean Punnett Square Builder for Biology Teachers &amp; Students &mdash; Built by Steven Humble</div>
+    </div>
+    <span class="toolbar-ver">V1.0.0 &mdash; 2026-08-22</span>
+  </div>
+
+  <!-- SPLIT CONTENT -->
+  <div class="content">
+    <div class="split-layout">
+      
+      <!-- LEFT PANEL: Controls -->
+      <div class="split-left" id="controls-panel">
+        
+        <!-- Cross Setup -->
+        <div class="opt-group">
+          <div class="opt-group-header">
+            <div class="opt-group-header-left"><i class="ti ti-adjustments"></i><span class="opt-group-title">Cross Configuration</span></div>
+          </div>
+          <div class="opt-group-body">
+            <div class="field-row">
+              <label>Cross Complexity</label>
+              <select id="crossComplexity" onchange="handleComplexityChange()">
+                <option value="monohybrid">Monohybrid Cross (2×2)</option>
+                <option value="dihybrid">Dihybrid Cross (4×4)</option>
+              </select>
+            </div>
+
+            <!-- Monohybrid Controls -->
+            <div id="monoInheritWrap">
+              <div class="field-row">
+                <label>Inheritance Pattern</label>
+                <select id="monoInheritType" onchange="handleInheritancePatternChange()">
+                  <option value="complete">Complete Dominance</option>
+                  <option value="incomplete">Incomplete Dominance (Blending)</option>
+                  <option value="codominant">Co-Dominant (Dual Expression)</option>
+                </select>
+              </div>
+              <div class="toggle-row" style="margin-top:4px; margin-bottom:10px;">
+                <input type="checkbox" id="monoSexLinked" onchange="handleSexLinkedToggle('mono')">
+                <label for="monoSexLinked" style="font-weight:600;">Is Sex-Linked (X-Linked)</label>
+              </div>
+            </div>
+
+            <!-- Dihybrid Controls -->
+            <div id="diInheritWrap" style="display:none;">
+              <div class="field-row">
+                <label>Gene 1 Inheritance Pattern</label>
+                <select id="diInheritGene1" onchange="updateTraitNamesUI()">
+                  <option value="complete">Complete Dominance</option>
+                  <option value="incomplete">Incomplete Dominance</option>
+                  <option value="codominant">Co-Dominant</option>
+                </select>
+              </div>
+              <div class="toggle-row" style="margin-bottom:10px;">
+                <input type="checkbox" id="diSexLinkedGene1" onchange="handleSexLinkedToggle('di1')">
+                <label for="diSexLinkedGene1">Gene 1 is Sex-Linked (X-Linked)</label>
+              </div>
+
+              <div class="field-row">
+                <label>Gene 2 Inheritance Pattern</label>
+                <select id="diInheritGene2" onchange="updateTraitNamesUI()">
+                  <option value="complete">Complete Dominance</option>
+                  <option value="incomplete">Incomplete Dominance</option>
+                  <option value="codominant">Co-Dominant</option>
+                </select>
+              </div>
+              <div class="toggle-row" style="margin-bottom:10px;">
+                <input type="checkbox" id="diSexLinkedGene2" onchange="handleSexLinkedToggle('di2')">
+                <label for="diSexLinkedGene2">Gene 2 is Sex-Linked (X-Linked)</label>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label>Square Fill Mode</label>
+              <select id="fillMode" onchange="triggerLiveUpdate()">
+                <option value="complete">Complete (Answer Key)</option>
+                <option value="blank">Blank Grid (Student Worksheet)</option>
+              </select>
+            </div>
+            
+            <div class="toggle-row" style="margin-top:10px;">
+              <input type="checkbox" id="showAxisSeparator" checked onchange="triggerLiveUpdate()">
+              <label for="showAxisSeparator">Show Parent Axis Separators (Dotted)</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Phenotype / Trait Names Card -->
+        <div class="opt-group">
+          <div class="opt-group-header">
+            <div class="opt-group-header-left"><i class="ti ti-typography"></i><span class="opt-group-title">Phenotype Trait Names</span></div>
+          </div>
+          <div class="opt-group-body">
+            <div id="traitNamesContainer"></div>
+            <div class="info-note">Leave blank for standard names, or type custom traits.</div>
+          </div>
+        </div>
+
+        <!-- Parent 1 Box Setup -->
+        <div class="opt-group">
+          <div class="opt-group-header">
+            <div class="opt-group-header-left"><i class="ti ti-dna"></i><span class="opt-group-title" id="p1GroupTitle">Parent 1 (Top Axis)</span></div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:8.5pt;color:#555;font-weight:600;">Color:</span>
+              <div id="p1ColorPickerWrap"></div>
+            </div>
+          </div>
+          <div class="opt-group-body">
+            <div class="field-row" style="margin-bottom:8px;">
+              <label style="font-size:8.5pt;color:#666;">Parent 1 Label (Printed Top)</label>
+              <input type="text" id="p1CustomLabel" oninput="triggerLiveUpdate()">
+            </div>
+            <div id="p1Boxes" class="allele-boxes-grid"></div>
+            <div id="p1Help" class="info-note">Use ^ for superscript (e.g. I^A, X^B) or _ for subscript (e.g. A_1).</div>
+          </div>
+        </div>
+
+        <!-- Parent 2 Box Setup -->
+        <div class="opt-group">
+          <div class="opt-group-header">
+            <div class="opt-group-header-left"><i class="ti ti-dna"></i><span class="opt-group-title" id="p2GroupTitle">Parent 2 (Left Axis)</span></div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:8.5pt;color:#555;font-weight:600;">Color:</span>
+              <div id="p2ColorPickerWrap"></div>
+            </div>
+          </div>
+          <div class="opt-group-body">
+            <div class="field-row" style="margin-bottom:8px;">
+              <label style="font-size:8.5pt;color:#666;">Parent 2 Label (Printed Left)</label>
+              <input type="text" id="p2CustomLabel" oninput="triggerLiveUpdate()">
+            </div>
+            <div id="p2Boxes" class="allele-boxes-grid"></div>
+            <div id="p2Help" class="info-note">Use ^ for superscript (e.g. I^B, X^b) or _ for subscript (e.g. A_2).</div>
+          </div>
+        </div>
+
+        <!-- Solution Breakdown Options -->
+        <div class="opt-group">
+          <div class="opt-group-header">
+            <div class="opt-group-header-left"><i class="ti ti-table"></i><span class="opt-group-title">Solution Table Options</span></div>
+          </div>
+          <div class="opt-group-body">
+            <div class="toggle-row">
+              <input type="checkbox" id="showSolutionSection" checked onchange="toggleSolutionVisibility()">
+              <label for="showSolutionSection">Display Solution Card</label>
+            </div>
+            <div class="toggle-row">
+              <input type="checkbox" id="showGenotypeRatios" checked onchange="triggerLiveUpdate()">
+              <label for="showGenotypeRatios">Include Genotype Frequencies</label>
+            </div>
+            <div class="toggle-row">
+              <input type="checkbox" id="showIndividualTraits" checked onchange="triggerLiveUpdate()">
+              <label for="showIndividualTraits">Individual Trait Breakdown (Dihybrid)</label>
+            </div>
+            <div class="toggle-row">
+              <input type="checkbox" id="showPhenotypeRatios" checked onchange="triggerLiveUpdate()">
+              <label for="showPhenotypeRatios">Include Combined Phenotypes</label>
+            </div>
+            <div class="toggle-row">
+              <input type="checkbox" id="showZeroOutcomes" onchange="triggerLiveUpdate()">
+              <label for="showZeroOutcomes">Show Zero-Frequency Outcomes (0%)</label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL: Distinct Preview Cards -->
+      <div class="split-right">
+        
+        <!-- CARD 1: Punnett Square Canvas -->
+        <div class="export-card" id="squareCard">
+          <div class="export-card-title"><i class="ti ti-grid-dots"></i> Punnett Square</div>
+          <canvas id="punnettCanvas"></canvas>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="downloadSquare()"><i class="ti ti-download"></i> Download PNG</button>
+            <button class="btn btn-green" id="copySquareBtn" onclick="copySquare()"><i class="ti ti-copy"></i> Copy Square</button>
+          </div>
+          <span class="copy-feedback" id="squareFeedback"><i class="ti ti-check"></i> Copied square to clipboard!</span>
+        </div>
+
+        <!-- CARD 2: Solution Table Canvas -->
+        <div class="export-card" id="solutionCard">
+          <div class="export-card-title"><i class="ti ti-list-details"></i> Solution Breakdown</div>
+          <canvas id="solutionCanvas"></canvas>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="downloadSolution()"><i class="ti ti-download"></i> Download PNG</button>
+            <button class="btn btn-green" id="copySolutionBtn" onclick="copySolution()"><i class="ti ti-copy"></i> Copy Solution</button>
+          </div>
+          <span class="copy-feedback" id="solutionFeedback"><i class="ti ti-check"></i> Copied solution to clipboard!</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+let debounceTimer = null;
+
+const PRESET_COLORS = [
+  { name: 'Navy / Blue',     value: '#0072B2' },
+  { name: 'Orange',          value: '#E69F00' },
+  { name: 'Bluish Green',    value: '#009E73' },
+  { name: 'Vermilion',       value: '#D55E00' },
+  { name: 'Sky Blue',        value: '#56B4E9' },
+  { name: 'Reddish Purple',  value: '#CC79A7' },
+  { name: 'Darkened Gold',   value: '#E5C494' },
+  { name: 'Charcoal Slate',  value: '#4A5568' }
+];
+
+let p1Color = '#3266ad';
+let p2Color = '#3266ad';
+
+let pendingColorCallback = null;
+const hiddenColorInput = document.getElementById('hidden-custom-color');
+hiddenColorInput.addEventListener('input', (e) => {
+  if (pendingColorCallback) {
+    pendingColorCallback(e.target.value);
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.color-picker-custom')) {
+    document.querySelectorAll('.color-menu.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+function createColorSelect(currentColor, onChangeCallback) {
+  const container = document.createElement('div');
+  container.className = 'color-picker-custom';
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'color-trigger';
+  trigger.style.backgroundColor = currentColor;
+  trigger.title = 'Change color';
+
+  const arrow = document.createElement('span');
+  arrow.className = 'arrow';
+  trigger.appendChild(arrow);
+
+  const menu = document.createElement('div');
+  menu.className = 'color-menu';
+
+  const grid = document.createElement('div');
+  grid.className = 'color-palette-grid';
+
+  PRESET_COLORS.forEach(c => {
+    const swatch = document.createElement('div');
+    swatch.className = 'color-palette-swatch';
+    swatch.style.backgroundColor = c.value;
+    swatch.title = c.name;
+    swatch.onclick = (e) => {
+      e.stopPropagation();
+      menu.classList.remove('open');
+      trigger.style.backgroundColor = c.value;
+      onChangeCallback(c.value);
+    };
+    grid.appendChild(swatch);
+  });
+
+  const customBtn = document.createElement('button');
+  customBtn.type = 'button';
+  customBtn.className = 'custom-hex-btn';
+  customBtn.textContent = 'Custom Hex…';
+  customBtn.onclick = (e) => {
+    e.stopPropagation();
+    menu.classList.remove('open');
+    pendingColorCallback = (newHex) => {
+      trigger.style.backgroundColor = newHex;
+      onChangeCallback(newHex);
+    };
+    hiddenColorInput.value = currentColor.startsWith('#') && currentColor.length === 7 ? currentColor : '#3266ad';
+    hiddenColorInput.click();
+  };
+
+  menu.appendChild(grid);
+  menu.appendChild(customBtn);
+
+  trigger.onclick = (e) => {
+    e.stopPropagation();
+    const isOpen = menu.classList.contains('open');
+    document.querySelectorAll('.color-menu.open').forEach(m => m.classList.remove('open'));
+    if (!isOpen) menu.classList.add('open');
+  };
+
+  container.appendChild(trigger);
+  container.appendChild(menu);
+  return container;
+}
+
+function initColorPickers() {
+  const w1 = document.getElementById('p1ColorPickerWrap');
+  const w2 = document.getElementById('p2ColorPickerWrap');
+  if (w1) {
+    w1.innerHTML = '';
+    w1.appendChild(createColorSelect(p1Color, (c) => { p1Color = c; triggerLiveUpdate(); }));
+  }
+  if (w2) {
+    w2.innerHTML = '';
+    w2.appendChild(createColorSelect(p2Color, (c) => { p2Color = c; triggerLiveUpdate(); }));
+  }
+}
+
+function triggerLiveUpdate() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(renderAll, 100);
+}
+
+function updateTraitNamesUI() {
+  const complexity = document.getElementById('crossComplexity').value;
+  const isDi = complexity === 'dihybrid';
+  const cont = document.getElementById('traitNamesContainer');
+  cont.innerHTML = '';
+
+  function makeTraitGroup(prefix, title, pattern, isSex) {
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom = '8px';
+    const heading = document.createElement('div');
+    heading.style.cssText = 'font-size:9pt;font-weight:700;color:#333;margin-bottom:3px;';
+    heading.textContent = title;
+    wrap.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'trait-inputs-grid';
+
+    if (isSex) {
+      grid.innerHTML = `
+        <div class="t-box"><span>Dominant / Unaffected Trait</span><input type="text" id="${prefix}_dom" oninput="triggerLiveUpdate()"></div>
+        <div class="t-box"><span>Recessive / Affected Trait</span><input type="text" id="${prefix}_rec" oninput="triggerLiveUpdate()"></div>
+      `;
+    } else if (pattern === 'incomplete') {
+      grid.innerHTML = `
+        <div class="t-box"><span>Pure Dominant</span><input type="text" id="${prefix}_dom" oninput="triggerLiveUpdate()"></div>
+        <div class="t-box"><span>Intermediate Blend</span><input type="text" id="${prefix}_blend" oninput="triggerLiveUpdate()"></div>
+        <div class="t-box" style="grid-column: span 2;"><span>Pure Recessive</span><input type="text" id="${prefix}_rec" oninput="triggerLiveUpdate()"></div>
+      `;
+    } else if (pattern === 'codominant') {
+      grid.innerHTML = `
+        <div class="t-box"><span>Trait 1 Expressed</span><input type="text" id="${prefix}_dom" oninput="triggerLiveUpdate()"></div>
+        <div class="t-box"><span>Trait 2 Expressed</span><input type="text" id="${prefix}_rec" oninput="triggerLiveUpdate()"></div>
+        <div class="t-box" style="grid-column: span 2;"><span>Co-Expressed (Both)</span><input type="text" id="${prefix}_blend" oninput="triggerLiveUpdate()"></div>
+      `;
+    } else {
+      // Complete Dominance
+      grid.innerHTML = `
+        <div class="t-box"><span>Dominant Trait</span><input type="text" id="${prefix}_dom" oninput="triggerLiveUpdate()"></div>
+        <div class="t-box"><span>Recessive Trait</span><input type="text" id="${prefix}_rec" oninput="triggerLiveUpdate()"></div>
+      `;
+    }
+
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  if (!isDi) {
+    const monoPattern = document.getElementById('monoInheritType').value;
+    const monoSex = document.getElementById('monoSexLinked').checked;
+    cont.appendChild(makeTraitGroup('tMono', 'Monohybrid Trait Description', monoPattern, monoSex));
+  } else {
+    const diP1 = document.getElementById('diInheritGene1').value;
+    const diSex1 = document.getElementById('diSexLinkedGene1').checked;
+    const diP2 = document.getElementById('diInheritGene2').value;
+    const diSex2 = document.getElementById('diSexLinkedGene2').checked;
+
+    cont.appendChild(makeTraitGroup('tDi1', 'Trait 1 (Gene 1) Names', diP1, diSex1));
+    cont.appendChild(makeTraitGroup('tDi2', 'Trait 2 (Gene 2) Names', diP2, diSex2));
+  }
+
+  triggerLiveUpdate();
+}
+
+function buildAlleleInputs(containerId, count, labels) {
+  const cont = document.getElementById(containerId);
+  cont.innerHTML = '';
+  cont.className = 'allele-boxes-grid';
+
+  for (let i = 0; i < count; i++) {
+    const boxWrap = document.createElement('div');
+    boxWrap.className = 'allele-box-wrap';
+
+    const subLbl = document.createElement('span');
+    subLbl.className = 'sub-lbl';
+    subLbl.textContent = labels[i] || `Allele ${i + 1}`;
+    subLbl.title = labels[i] || `Allele ${i + 1}`;
+
+    const txtInput = document.createElement('input');
+    txtInput.type = 'text';
+    txtInput.id = `${containerId}_b${i}`;
+    txtInput.value = '';
+    txtInput.oninput = triggerLiveUpdate;
+
+    boxWrap.appendChild(subLbl);
+    boxWrap.appendChild(txtInput);
+    cont.appendChild(boxWrap);
+  }
+}
+
+function handleComplexityChange() {
+  const complexity = document.getElementById('crossComplexity').value;
+  const monoWrap = document.getElementById('monoInheritWrap');
+  const diWrap = document.getElementById('diInheritWrap');
+
+  if (complexity === 'dihybrid') {
+    monoWrap.style.display = 'none';
+    diWrap.style.display = 'block';
+    setupDihybridBoxes();
+  } else {
+    monoWrap.style.display = 'block';
+    diWrap.style.display = 'none';
+    handleInheritancePatternChange();
+  }
+  updateTraitNamesUI();
+}
+
+function handleSexLinkedToggle(scope) {
+  if (scope === 'mono') {
+    handleInheritancePatternChange();
+  } else {
+    setupDihybridBoxes();
+  }
+  updateTraitNamesUI();
+}
+
+function handleInheritancePatternChange() {
+  const isSex = document.getElementById('monoSexLinked').checked;
+  const p1Title = document.getElementById('p1GroupTitle');
+  const p2Title = document.getElementById('p2GroupTitle');
+
+  if (isSex) {
+    p1Title.textContent = 'Female Parent ♀ (Top Axis)';
+    p2Title.textContent = 'Male Parent ♂ (Left Axis)';
+    buildAlleleInputs('p1Boxes', 2, ['Maternal X', 'Maternal X']);
+    buildAlleleInputs('p2Boxes', 2, ['Paternal X', 'Paternal Y']);
+  } else {
+    p1Title.textContent = 'Parent 1 (Top Axis)';
+    p2Title.textContent = 'Parent 2 (Left Axis)';
+    buildAlleleInputs('p1Boxes', 2, ['Allele 1', 'Allele 2']);
+    buildAlleleInputs('p2Boxes', 2, ['Allele 1', 'Allele 2']);
+  }
+
+  updateTraitNamesUI();
+}
+
+function setupDihybridBoxes() {
+  const g1Sex = document.getElementById('diSexLinkedGene1').checked;
+  const g2Sex = document.getElementById('diSexLinkedGene2').checked;
+  const p1Title = document.getElementById('p1GroupTitle');
+  const p2Title = document.getElementById('p2GroupTitle');
+
+  p1Title.textContent = (g1Sex || g2Sex) ? 'Female Parent ♀ (Top Axis)' : 'Parent 1 Genotype (Top Axis)';
+  p2Title.textContent = (g1Sex || g2Sex) ? 'Male Parent ♂ (Left Axis)' : 'Parent 2 Genotype (Left Axis)';
+
+  const labels = [
+    g1Sex ? 'Gene 1 (X)' : 'Gene 1 (Allele 1)',
+    g1Sex ? 'Gene 1 (X)' : 'Gene 1 (Allele 2)',
+    g2Sex ? 'Gene 2 (X)' : 'Gene 2 (Allele 1)',
+    g2Sex ? 'Gene 2 (X/Y)' : 'Gene 2 (Allele 2)'
+  ];
+
+  buildAlleleInputs('p1Boxes', 4, labels);
+  buildAlleleInputs('p2Boxes', 4, labels);
+
+  updateTraitNamesUI();
+}
+
+function toggleSolutionVisibility() {
+  const show = document.getElementById('showSolutionSection').checked;
+  document.getElementById('solutionCard').style.display = show ? 'flex' : 'none';
+  if (show) renderAll();
+}
+
+function parseSingleAllele(rawStr) {
+  const txt = (rawStr || '').trim();
+  const tokens = [];
+  let i = 0;
+  let baseLetter = '';
+  let scriptLetter = '';
+
+  while (i < txt.length) {
+    const ch = txt[i];
+    if (ch === '^' || ch === '_') {
+      const type = ch === '^' ? 'sup' : 'sub';
+      i++;
+      let subStr = '';
+      if (txt[i] === '{') {
+        i++;
+        while (i < txt.length && txt[i] !== '}') {
+          subStr += txt[i++];
+        }
+        if (i < txt.length) i++;
+      } else {
+        subStr = txt[i] || '';
+        i++;
+      }
+      scriptLetter += subStr;
+      tokens.push({ text: subStr, type: type });
+    } else {
+      baseLetter += ch;
+      tokens.push({ text: ch, type: 'norm' });
+      i++;
+    }
+  }
+
+  return {
+    raw: txt,
+    base: baseLetter,
+    script: scriptLetter,
+    isY: baseLetter.toUpperCase() === 'Y',
+    isX: baseLetter.toUpperCase() === 'X',
+    tokens: tokens.length ? tokens : [{ text: '', type: 'norm' }]
+  };
+}
+
+function compareAlleleUnits(a, b) {
+  if (a.isY && !b.isY) return 1;
+  if (!a.isY && b.isY) return -1;
+
+  if (a.isX && b.isX) {
+    if (a.script !== b.script) {
+      const aIsUpper = a.script.toUpperCase() === a.script && a.script.toLowerCase() !== a.script;
+      const bIsUpper = b.script.toUpperCase() === b.script && b.script.toLowerCase() !== b.script;
+      if (aIsUpper && !bIsUpper) return -1;
+      if (!aIsUpper && bIsUpper) return 1;
+      return a.script.localeCompare(b.script);
+    }
+  }
+
+  if (a.base !== b.base) {
+    const aIsUpper = a.base.toUpperCase() === a.base && a.base.toLowerCase() !== a.base;
+    const bIsUpper = b.base.toUpperCase() === b.base && b.base.toLowerCase() !== b.base;
+    if (aIsUpper && !bIsUpper) return -1;
+    if (!aIsUpper && bIsUpper) return 1;
+    return a.base.localeCompare(b.base);
+  }
+
+  if (a.script !== b.script) {
+    const aIsUpper = a.script.toUpperCase() === a.script && a.script.toLowerCase() !== a.script;
+    const bIsUpper = b.script.toUpperCase() === b.script && b.script.toLowerCase() !== b.script;
+    if (aIsUpper && !bIsUpper) return -1;
+    if (!aIsUpper && bIsUpper) return 1;
+    return a.script.localeCompare(b.script);
+  }
+
+  return a.raw.localeCompare(b.raw);
+}
+
+function getGameteUnits(containerId, isDi) {
+  if (isDi) {
+    const a1 = parseSingleAllele(document.getElementById(`${containerId}_b0`)?.value || '');
+    const a2 = parseSingleAllele(document.getElementById(`${containerId}_b1`)?.value || '');
+    const b1 = parseSingleAllele(document.getElementById(`${containerId}_b2`)?.value || '');
+    const b2 = parseSingleAllele(document.getElementById(`${containerId}_b3`)?.value || '');
+    return [
+      [a1, b1],
+      [a1, b2],
+      [a2, b1],
+      [a2, b2]
+    ];
+  }
+
+  const a1 = parseSingleAllele(document.getElementById(`${containerId}_b0`)?.value || '');
+  const a2 = parseSingleAllele(document.getElementById(`${containerId}_b1`)?.value || '');
+  return [[a1], [a2]];
+}
+
+function combineGameteUnits(gLeft, gTop, isDi) {
+  if (!isDi) {
+    const pair = [gLeft[0], gTop[0]].sort(compareAlleleUnits);
+    const combinedTokens = [...pair[0].tokens, ...pair[1].tokens];
+    const key = pair[0].raw + pair[1].raw;
+    const isMale = pair.some(u => u.isY);
+    const isFemale = pair.every(u => u.isX);
+    return { tokens: combinedTokens, key: key, units: pair, isMale, isFemale };
+  }
+
+  const gene1Pair = [gLeft[0], gTop[0]].sort(compareAlleleUnits);
+  const gene2Pair = [gLeft[1], gTop[1]].sort(compareAlleleUnits);
+
+  const combinedTokens = [
+    ...gene1Pair[0].tokens, ...gene1Pair[1].tokens,
+    ...gene2Pair[0].tokens, ...gene2Pair[1].tokens
+  ];
+  const key = gene1Pair[0].raw + gene1Pair[1].raw + gene2Pair[0].raw + gene2Pair[1].raw;
+  const allUnits = [...gene1Pair, ...gene2Pair];
+  const isMale = allUnits.some(u => u.isY);
+  const isFemale = allUnits.some(u => u.isX) && !isMale;
+
+  return { tokens: combinedTokens, key: key, units: allUnits, isMale, isFemale, gene1Pair, gene2Pair };
+}
+
+function evaluateSingleLocusCustom(pairUnits, pattern, isSexLinked, prefix) {
+  const [u1, u2] = pairUnits;
+  const hasY = u1.isY || u2.isY;
+
+  const customDom = document.getElementById(`${prefix}_dom`)?.value.trim();
+  const customRec = document.getElementById(`${prefix}_rec`)?.value.trim();
+  const customBlend = document.getElementById(`${prefix}_blend`)?.value.trim();
+
+  if (isSexLinked) {
+    if (hasY) {
+      const xUnit = u1.isY ? u2 : u1;
+      const aff = xUnit.script.toLowerCase() === xUnit.script && xUnit.script.toUpperCase() !== xUnit.script;
+      return aff ? (customRec || 'Recessive / Affected') : (customDom || 'Dominant');
+    } else {
+      const s1 = u1.script, s2 = u2.script;
+      const isCarrier = (s1 !== s2) && (s1.toUpperCase() === s1 || s2.toUpperCase() === s2);
+      const isHomozygousAff = (s1.toLowerCase() === s1 && s2.toLowerCase() === s2 && s1.toUpperCase() !== s1 && s2.toUpperCase() !== s2);
+
+      if (pattern === 'incomplete') {
+        if (isCarrier) return customBlend || 'Intermediate Blend';
+        return isHomozygousAff ? (customRec || 'Recessive Pure') : (customDom || 'Dominant Pure');
+      }
+      if (pattern === 'codominant') {
+        if (isCarrier) return customBlend || 'Co-Expressed (Dual)';
+        return isHomozygousAff ? (customRec || 'Trait 2 Expressed') : (customDom || 'Trait 1 Expressed');
+      }
+      return isHomozygousAff ? (customRec || 'Recessive / Affected') : (customDom || 'Dominant');
+    }
+  }
+
+  const b1 = u1.base || u1.raw;
+  const b2 = u2.base || u2.raw;
+  const s1 = u1.script, s2 = u2.script;
+
+  const hasUpper = (b1.toUpperCase() === b1 && b1.toLowerCase() !== b1) || (b2.toUpperCase() === b2 && b2.toLowerCase() !== b2) ||
+                   (s1.toUpperCase() === s1 && s1.toLowerCase() !== s1) || (s2.toUpperCase() === s2 && s2.toLowerCase() !== s2);
+  const isHomozygous = (b1 === b2 && s1 === s2);
+
+  if (pattern === 'complete') {
+    return hasUpper ? (customDom || 'Dominant') : (customRec || 'Recessive');
+  }
+  if (pattern === 'incomplete') {
+    if (isHomozygous) {
+      return hasUpper ? (customDom || 'Dominant Pure') : (customRec || 'Recessive Pure');
+    }
+    return customBlend || 'Intermediate Blend';
+  }
+  if (pattern === 'codominant') {
+    if (isHomozygous) {
+      return hasUpper ? (customDom || 'Trait 1 Expressed') : (customRec || 'Trait 2 Expressed');
+    }
+    return customBlend || 'Co-Expressed (Both)';
+  }
+  return '';
+}
+
+function getTheoreticalLocusPhenotypes(pattern, isSexLinked, prefix) {
+  const customDom = document.getElementById(`${prefix}_dom`)?.value.trim();
+  const customRec = document.getElementById(`${prefix}_rec`)?.value.trim();
+  const customBlend = document.getElementById(`${prefix}_blend`)?.value.trim();
+
+  if (isSexLinked) {
+    return {
+      female: pattern === 'complete' ? [customDom || 'Dominant', customRec || 'Recessive / Affected'] : [customDom || (pattern === 'incomplete' ? 'Dominant Pure' : 'Trait 1 Expressed'), customBlend || (pattern === 'incomplete' ? 'Intermediate Blend' : 'Co-Expressed (Dual)'), customRec || (pattern === 'incomplete' ? 'Recessive Pure' : 'Trait 2 Expressed')],
+      male: [customDom || 'Dominant', customRec || 'Recessive / Affected']
+    };
+  }
+
+  if (pattern === 'incomplete') {
+    return [customDom || 'Dominant Pure', customBlend || 'Intermediate Blend', customRec || 'Recessive Pure'];
+  }
+  if (pattern === 'codominant') {
+    return [customDom || 'Trait 1 Expressed', customBlend || 'Co-Expressed (Both)', customRec || 'Trait 2 Expressed'];
+  }
+  return [customDom || 'Dominant', customRec || 'Recessive'];
+}
+
+function measureTokens(ctx, tokens, baseFontSize) {
+  let w = 0;
+  const scriptFontSize = Math.round(baseFontSize * 0.65);
+  tokens.forEach(tok => {
+    ctx.font = tok.type === 'norm' ? `bold ${baseFontSize}px Arial, sans-serif` : `bold ${scriptFontSize}px Arial, sans-serif`;
+    w += ctx.measureText(tok.text).width;
+  });
+  return w;
+}
+
+function drawTokens(ctx, tokens, centerX, centerY, baseFontSize, color = '#1e2a3a') {
+  const totalW = measureTokens(ctx, tokens, baseFontSize);
+  let curX = centerX - (totalW / 2);
+  const scriptFontSize = Math.round(baseFontSize * 0.65);
+  const shiftY = baseFontSize * 0.32;
+
+  ctx.textAlign = 'left';
+  ctx.fillStyle = color;
+
+  tokens.forEach(tok => {
+    if (tok.type === 'norm') {
+      ctx.font = `bold ${baseFontSize}px Arial, sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(tok.text, curX, centerY);
+      curX += ctx.measureText(tok.text).width;
+    } else if (tok.type === 'sup') {
+      ctx.font = `bold ${scriptFontSize}px Arial, sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(tok.text, curX, centerY - shiftY);
+      curX += ctx.measureText(tok.text).width;
+    } else if (tok.type === 'sub') {
+      ctx.font = `bold ${scriptFontSize}px Arial, sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(tok.text, curX, centerY + shiftY);
+      curX += ctx.measureText(tok.text).width;
+    }
+  });
+}
+
+function renderAll() {
+  const complexity = document.getElementById('crossComplexity').value;
+  const isDi = complexity === 'dihybrid';
+
+  const monoPattern = document.getElementById('monoInheritType').value;
+  const monoSex = !isDi && document.getElementById('monoSexLinked').checked;
+
+  const diP1 = document.getElementById('diInheritGene1').value;
+  const diP2 = document.getElementById('diInheritGene2').value;
+  const diSex1 = isDi && document.getElementById('diSexLinkedGene1').checked;
+  const diSex2 = isDi && document.getElementById('diSexLinkedGene2').checked;
+  const isSexLinkedCross = monoSex || diSex1 || diSex2;
+
+  const p1CustomLabel = document.getElementById('p1CustomLabel')?.value.trim() || '';
+  const p2CustomLabel = document.getElementById('p2CustomLabel')?.value.trim() || '';
+
+  const isBlank = document.getElementById('fillMode').value === 'blank';
+  const showSolution = document.getElementById('showSolutionSection').checked;
+  const showGenos = document.getElementById('showGenotypeRatios').checked;
+  const showIndiv = document.getElementById('showIndividualTraits').checked && isDi;
+  const showPhenos = document.getElementById('showPhenotypeRatios').checked;
+  const showZero = document.getElementById('showZeroOutcomes').checked;
+  const showSeparator = document.getElementById('showAxisSeparator').checked;
+
+  const topGametes = getGameteUnits('p1Boxes', isDi);
+  const leftGametes = getGameteUnits('p2Boxes', isDi);
+
+  const gridSize = isDi ? 4 : 2;
+  const cellSize = isDi ? 74 : 95;
+  const headerSize = isDi ? 64 : 75;
+  const squareDim = headerSize + (gridSize * cellSize);
+
+  // Groupings
+  const genoGroups = { all: {}, female: {}, male: {} };
+  const phenoCombined = { all: {}, female: {}, male: {} };
+  const trait1Phenos = { all: {}, female: {}, male: {} };
+  const trait2Phenos = { all: {}, female: {}, male: {} };
+  const total = gridSize * gridSize;
+
+  // Zero matrix population
+  if (showZero) {
+    if (!isDi) {
+      const list = getTheoreticalLocusPhenotypes(monoPattern, monoSex, 'tMono');
+      if (monoSex) {
+        list.female.forEach(p => phenoCombined.female[p] = 0);
+        list.male.forEach(p => phenoCombined.male[p] = 0);
+      } else {
+        list.forEach(p => phenoCombined.all[p] = 0);
+      }
+    } else {
+      const list1 = getTheoreticalLocusPhenotypes(diP1, diSex1, 'tDi1');
+      const list2 = getTheoreticalLocusPhenotypes(diP2, diSex2, 'tDi2');
+
+      if (diSex1) {
+        list1.female.forEach(p => trait1Phenos.female[p] = 0);
+        list1.male.forEach(p => trait1Phenos.male[p] = 0);
+      } else {
+        list1.forEach(p => trait1Phenos.all[p] = 0);
+      }
+
+      if (diSex2) {
+        list2.female.forEach(p => trait2Phenos.female[p] = 0);
+        list2.male.forEach(p => trait2Phenos.male[p] = 0);
+      } else {
+        list2.forEach(p => trait2Phenos.all[p] = 0);
+      }
+
+      const getFlatList = (l, isS, sex) => isS ? (sex === 'female' ? l.female : l.male) : l;
+      if (isSexLinkedCross) {
+        ['female', 'male'].forEach(sex => {
+          const l1 = getFlatList(list1, diSex1, sex);
+          const l2 = getFlatList(list2, diSex2, sex);
+          l1.forEach(p1 => {
+            l2.forEach(p2 => {
+              phenoCombined[sex][`${p1} / ${p2}`] = 0;
+            });
+          });
+        });
+      } else {
+        list1.forEach(p1 => {
+          list2.forEach(p2 => {
+            phenoCombined.all[`${p1} / ${p2}`] = 0;
+          });
+        });
+      }
+    }
+  }
+
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      const combined = combineGameteUnits(leftGametes[r], topGametes[c], isDi);
+      const sexKey = isSexLinkedCross ? (combined.isMale ? 'male' : 'female') : 'all';
+
+      if (combined.key) {
+        genoGroups.all[combined.key] = (genoGroups.all[combined.key] || { count: 0, tokens: combined.tokens });
+        genoGroups.all[combined.key].count++;
+        if (isSexLinkedCross) {
+          genoGroups[sexKey][combined.key] = (genoGroups[sexKey][combined.key] || { count: 0, tokens: combined.tokens });
+          genoGroups[sexKey][combined.key].count++;
+        }
+      }
+
+      if (!isDi) {
+        const pDesc = evaluateSingleLocusCustom(combined.units, monoPattern, monoSex, 'tMono');
+        if (pDesc) {
+          phenoCombined.all[pDesc] = (phenoCombined.all[pDesc] || 0) + 1;
+          if (monoSex) {
+            phenoCombined[sexKey][pDesc] = (phenoCombined[sexKey][pDesc] || 0) + 1;
+          }
+        }
+      } else {
+        const p1 = evaluateSingleLocusCustom(combined.gene1Pair, diP1, diSex1, 'tDi1');
+        const p2 = evaluateSingleLocusCustom(combined.gene2Pair, diP2, diSex2, 'tDi2');
+
+        if (p1) {
+          trait1Phenos.all[p1] = (trait1Phenos.all[p1] || 0) + 1;
+          if (diSex1) trait1Phenos[sexKey][p1] = (trait1Phenos[sexKey][p1] || 0) + 1;
+        }
+
+        if (p2) {
+          trait2Phenos.all[p2] = (trait2Phenos.all[p2] || 0) + 1;
+          if (diSex2) trait2Phenos[sexKey][p2] = (trait2Phenos[sexKey][p2] || 0) + 1;
+        }
+
+        if (p1 && p2) {
+          const combo = `${p1} / ${p2}`;
+          phenoCombined.all[combo] = (phenoCombined.all[combo] || 0) + 1;
+          if (isSexLinkedCross) {
+            phenoCombined[sexKey][combo] = (phenoCombined[sexKey][combo] || 0) + 1;
+          }
+        }
+      }
+    }
+  }
+
+  // 1. RENDER PUNNETT SQUARE CANVAS (Adaptive for Custom Parent Labels)
+  const pCanvas = document.getElementById('punnettCanvas');
+  const pCtx = pCanvas.getContext('2d');
+  
+  const padT = p1CustomLabel ? 36 : 18;
+  const padL = p2CustomLabel ? 36 : 18;
+  const padB = 18;
+  const padR = 18;
+
+  pCanvas.width = squareDim + padL + padR;
+  pCanvas.height = squareDim + padT + padB;
+
+  pCtx.fillStyle = '#ffffff';
+  pCtx.fillRect(0, 0, pCanvas.width, pCanvas.height);
+
+  const ox = padL, oy = padT;
+
+  if (p1CustomLabel) {
+    pCtx.save();
+    pCtx.font = 'italic 12px system-ui, -apple-system, sans-serif';
+    pCtx.fillStyle = p1Color;
+    pCtx.textAlign = 'center';
+    pCtx.textBaseline = 'bottom';
+    const topCenterX = ox + headerSize + (gridSize * cellSize) / 2;
+    pCtx.fillText(p1CustomLabel, topCenterX, oy + (headerSize / 2) - (isDi ? 16 : 22));
+    pCtx.restore();
+  }
+
+  if (p2CustomLabel) {
+    pCtx.save();
+    pCtx.font = 'italic 12px system-ui, -apple-system, sans-serif';
+    pCtx.fillStyle = p2Color;
+    pCtx.textAlign = 'center';
+    pCtx.textBaseline = 'bottom';
+    const leftCenterY = oy + headerSize + (gridSize * cellSize) / 2;
+    pCtx.translate(ox + (headerSize / 2) - (isDi ? 16 : 22), leftCenterY);
+    pCtx.rotate(-Math.PI / 2);
+    pCtx.fillText(p2CustomLabel, 0, 0);
+    pCtx.restore();
+  }
+
+  // Parent Axis Separator Lines (Dotted extensions through half of the header width/height)
+  if (showSeparator) {
+    pCtx.save();
+    pCtx.strokeStyle = '#888888';
+    pCtx.lineWidth = 1.5;
+    pCtx.setLineDash([4, 3]);
+
+    const halfExt = headerSize * 0.5;
+
+    // Vertical divider extensions (from square boundary upwards by half the header height)
+    for (let c = 1; c < gridSize; c++) {
+      const lineX = ox + headerSize + (c * cellSize);
+      pCtx.beginPath();
+      pCtx.moveTo(lineX, oy + headerSize);
+      pCtx.lineTo(lineX, oy + headerSize - halfExt);
+      pCtx.stroke();
+    }
+
+    // Horizontal divider extensions (from square boundary leftwards by half the header width)
+    for (let r = 1; r < gridSize; r++) {
+      const lineY = oy + headerSize + (r * cellSize);
+      pCtx.beginPath();
+      pCtx.moveTo(ox + headerSize, lineY);
+      pCtx.lineTo(ox + headerSize - halfExt, lineY);
+      pCtx.stroke();
+    }
+
+    pCtx.restore();
+  }
+
+  topGametes.forEach((gUnits, i) => {
+    const tokens = gUnits.flatMap(u => u.tokens);
+    const x = ox + headerSize + (i * cellSize) + (cellSize / 2);
+    const y = oy + (headerSize / 2);
+    drawTokens(pCtx, tokens, x, y, isDi ? 14 : 19, p1Color);
+  });
+
+  leftGametes.forEach((gUnits, i) => {
+    const tokens = gUnits.flatMap(u => u.tokens);
+    const x = ox + (headerSize / 2);
+    const y = oy + headerSize + (i * cellSize) + (cellSize / 2);
+    drawTokens(pCtx, tokens, x, y, isDi ? 14 : 19, p2Color);
+  });
+
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      const x = ox + headerSize + (c * cellSize);
+      const y = oy + headerSize + (r * cellSize);
+      pCtx.strokeStyle = '#1e2a3a';
+      pCtx.lineWidth = 2;
+      pCtx.strokeRect(x, y, cellSize, cellSize);
+
+      if (!isBlank) {
+        const combined = combineGameteUnits(leftGametes[r], topGametes[c], isDi);
+        drawTokens(pCtx, combined.tokens, x + (cellSize / 2), y + (cellSize / 2), isDi ? 13.5 : 20, '#111827');
+      }
+    }
+  }
+
+  // 2. RENDER SEPARATE SOLUTION BREAKDOWN CANVAS
+  if (showSolution) {
+    const sCanvas = document.getElementById('solutionCanvas');
+    const sCtx = sCanvas.getContext('2d');
+
+    const colW1 = 360, colW2 = 80, colW3 = 80;
+    const tableWidth = colW1 + colW2 + colW3;
+    const rowH = 25;
+
+    let totalRows = 0;
+    let sectionCount = 0;
+
+    function countGroupRows(groupObj, hasSex) {
+      if (hasSex) {
+        return Object.keys(groupObj.female).length + Object.keys(groupObj.male).length + 2;
+      }
+      return Object.keys(groupObj.all).length + 1;
+    }
+
+    if (showGenos) {
+      totalRows += countGroupRows(genoGroups, isSexLinkedCross);
+      sectionCount += isSexLinkedCross ? 2 : 1;
+    }
+
+    if (showIndiv && isDi) {
+      totalRows += countGroupRows(trait1Phenos, diSex1);
+      sectionCount += diSex1 ? 2 : 1;
+      totalRows += countGroupRows(trait2Phenos, diSex2);
+      sectionCount += diSex2 ? 2 : 1;
+    }
+
+    if (showPhenos) {
+      totalRows += countGroupRows(phenoCombined, isSexLinkedCross);
+      sectionCount += isSexLinkedCross ? 2 : 1;
+    }
+
+    const sPad = 16;
+    sCanvas.width = tableWidth + (sPad * 2);
+    sCanvas.height = (totalRows * rowH) + (sectionCount * 28) + (sPad * 2) + 20;
+
+    sCtx.fillStyle = '#ffffff';
+    sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
+
+    let ty = sPad + 10;
+    const tx = sPad;
+
+    function renderHeader(title) {
+      sCtx.fillStyle = '#1e2a3a';
+      sCtx.font = 'bold 12px system-ui, -apple-system, sans-serif';
+      sCtx.textAlign = 'left';
+      sCtx.fillText(title, tx, ty);
+      ty += 8;
+
+      sCtx.fillStyle = '#f5f5f5';
+      sCtx.fillRect(tx, ty, tableWidth, rowH);
+      sCtx.strokeStyle = '#cccccc';
+      sCtx.lineWidth = 1;
+      sCtx.strokeRect(tx, ty, tableWidth, rowH);
+
+      sCtx.fillStyle = '#555555';
+      sCtx.font = 'bold 10px system-ui, -apple-system, sans-serif';
+      sCtx.textBaseline = 'middle';
+      sCtx.fillText('Phenotypic Trait', tx + 8, ty + (rowH / 2));
+      sCtx.fillText('Ratio', tx + colW1 + 8, ty + (rowH / 2));
+      sCtx.fillText('Percent', tx + colW1 + colW2 + 8, ty + (rowH / 2));
+      ty += rowH;
+    }
+
+    function renderRow(tokensOrStr, count, isTokens = false) {
+      sCtx.strokeStyle = '#eeeeee';
+      sCtx.lineWidth = 1;
+      sCtx.strokeRect(tx, ty, tableWidth, rowH);
+      sCtx.textBaseline = 'middle';
+
+      if (isTokens) {
+        drawTokens(sCtx, tokensOrStr, tx + 24, ty + (rowH / 2), 12.5, '#1e2a3a');
+      } else {
+        sCtx.fillStyle = '#222222';
+        sCtx.font = '10px system-ui, -apple-system, sans-serif';
+        sCtx.textAlign = 'left';
+        sCtx.fillText(tokensOrStr, tx + 8, ty + (rowH / 2));
+      }
+
+      sCtx.fillStyle = '#333333';
+      sCtx.font = '11px monospace, sans-serif';
+      sCtx.textAlign = 'left';
+      sCtx.fillText(`${count}/${total}`, tx + colW1 + 8, ty + (rowH / 2));
+      sCtx.fillText(`${Math.round((count / total) * 100)}%`, tx + colW1 + colW2 + 8, ty + (rowH / 2));
+      ty += rowH;
+    }
+
+    // Genotypes
+    if (showGenos) {
+      if (isSexLinkedCross) {
+        renderHeader('Genotypes: Female Offspring (XX)');
+        for (const item of Object.values(genoGroups.female)) renderRow(item.tokens, item.count, true);
+        ty += 14;
+        renderHeader('Genotypes: Male Offspring (XY)');
+        for (const item of Object.values(genoGroups.male)) renderRow(item.tokens, item.count, true);
+        ty += 18;
+      } else {
+        renderHeader('Genotypic Breakdown');
+        for (const item of Object.values(genoGroups.all)) renderRow(item.tokens, item.count, true);
+        ty += 18;
+      }
+    }
+
+    // Individual Traits for Dihybrid
+    if (showIndiv && isDi) {
+      if (diSex1) {
+        renderHeader('Trait 1 (Gene 1): Female Offspring');
+        for (const [p, c] of Object.entries(trait1Phenos.female)) renderRow(p, c, false);
+        ty += 14;
+        renderHeader('Trait 1 (Gene 1): Male Offspring');
+        for (const [p, c] of Object.entries(trait1Phenos.male)) renderRow(p, c, false);
+        ty += 18;
+      } else {
+        renderHeader('Trait 1 (Gene 1) Phenotypic Breakdown');
+        for (const [p, c] of Object.entries(trait1Phenos.all)) renderRow(p, c, false);
+        ty += 18;
+      }
+
+      if (diSex2) {
+        renderHeader('Trait 2 (Gene 2): Female Offspring');
+        for (const [p, c] of Object.entries(trait2Phenos.female)) renderRow(p, c, false);
+        ty += 14;
+        renderHeader('Trait 2 (Gene 2): Male Offspring');
+        for (const [p, c] of Object.entries(trait2Phenos.male)) renderRow(p, c, false);
+        ty += 18;
+      } else {
+        renderHeader('Trait 2 (Gene 2) Phenotypic Breakdown');
+        for (const [p, c] of Object.entries(trait2Phenos.all)) renderRow(p, c, false);
+        ty += 18;
+      }
+    }
+
+    // Combined Phenotypes
+    if (showPhenos) {
+      if (isSexLinkedCross) {
+        renderHeader('Combined Phenotypes: Female Offspring (XX)');
+        for (const [pheno, count] of Object.entries(phenoCombined.female)) renderRow(pheno, count, false);
+        ty += 14;
+        renderHeader('Combined Phenotypes: Male Offspring (XY)');
+        for (const [pheno, count] of Object.entries(phenoCombined.male)) renderRow(pheno, count, false);
+      } else {
+        renderHeader(isDi ? 'Combined 2-Trait Phenotypic Distribution' : 'Phenotypic Breakdown');
+        for (const [pheno, count] of Object.entries(phenoCombined.all)) renderRow(pheno, count, false);
+      }
+    }
+  }
+}
+
+/* --- EXPORT HANDLERS --- */
+function getTimestamp() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+
+function downloadSquare() {
+  const canvas = document.getElementById('punnettCanvas');
+  const a = document.createElement('a');
+  a.download = `Punnett_Square_${getTimestamp()}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+async function copySquare() {
+  const canvas = document.getElementById('punnettCanvas');
+  const btn = document.getElementById('copySquareBtn');
+  const fb = document.getElementById('squareFeedback');
+  try {
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    fb.style.display = 'inline-flex';
+    btn.style.background = '#145e2c';
+    setTimeout(() => {
+      fb.style.display = 'none';
+      btn.style.background = '#1a7a3a';
+    }, 2500);
+  } catch (err) {
+    window.open(canvas.toDataURL('image/png'), '_blank');
+  }
+}
+
+function downloadSolution() {
+  const canvas = document.getElementById('solutionCanvas');
+  const a = document.createElement('a');
+  a.download = `Punnett_Solution_${getTimestamp()}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+async function copySolution() {
+  const canvas = document.getElementById('solutionCanvas');
+  const btn = document.getElementById('copySolutionBtn');
+  const fb = document.getElementById('solutionFeedback');
+  try {
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    fb.style.display = 'inline-flex';
+    btn.style.background = '#145e2c';
+    setTimeout(() => {
+      fb.style.display = 'none';
+      btn.style.background = '#1a7a3a';
+    }, 2500);
+  } catch (err) {
+    window.open(canvas.toDataURL('image/png'), '_blank');
+  }
+}
+
+window.onload = () => {
+  initColorPickers();
+  handleComplexityChange();
+};
+</script>
+</body>
+</html>
