@@ -2,78 +2,517 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>A Humble Punnett Square</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/webfont/tabler-icons.min.css">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:11pt;background:#f0f2f5;color:#1e2a3a;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
-#app{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;background:#fff;}
+/* --- A HUMBLE UNIFIED DESIGN SYSTEM START --- */
+:root {
+  /* Brand & Shell Colors */
+  --header-bg: #1e2a3a;
+  --header-border: #12202e;
+  --header-title: #ffffff;
+  --header-sub: rgba(255, 255, 255, 0.65);
+  --header-ver: rgba(255, 255, 255, 0.45);
 
-/* Top Header */
-#app-header{background:#1e2a3a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #12202e;}
-.header-titles{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;}
-#app-title{font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:bold;color:#fff;letter-spacing:0.01em;white-space:nowrap;line-height:1.2;margin:0;padding:0;}
-#app-subtitle{font-size:10px;color:rgba(255,255,255,0.65);font-style:italic;white-space:nowrap;line-height:1.2;margin:0;padding:0;}
-.toolbar-ver{font-size:8pt;color:rgba(255,255,255,0.4);font-family:Arial,sans-serif;white-space:nowrap;margin-left:16px;}
+  /* Page Canvas & Panel Backgrounds */
+  --app-window-bg: #f0f2f5;
+  --app-panel-bg: #ffffff;
+  --stage-bg: #f9fafc;
+
+  /* Card & Border Accents */
+  --card-border: #cbd5e1;
+  --card-header-bg: #f8fafc;
+  --card-header-border: #e2e8f0;
+  --card-header-title: #475569;
+  --card-header-icon: #64748b;
+
+  /* Form Elements */
+  --input-border: #cbd5e1;
+  --input-border-hover: #94a3b8;
+  --input-border-focus: #3266ad;
+  --input-focus-ring: rgba(50, 102, 173, 0.15);
+  --input-text: #1e2a3a;
+  --input-label: #475569;
+
+  /* Standard Action Buttons */
+  --btn-primary-bg: #3266ad;
+  --btn-primary-hover: #185fa5;
+  --btn-primary-text: #ffffff;
+
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-border: #cbd5e1;
+  --btn-secondary-hover-bg: #f1f5f9;
+  --btn-secondary-hover-border: #94a3b8;
+  --btn-secondary-text: #334155;
+
+  --btn-green-bg: #1a7a3a;
+  --btn-green-hover: #145e2c;
+  --btn-green-text: #ffffff;
+
+  --btn-danger-bg: #b00020;
+  --btn-danger-hover: #8e001a;
+  --btn-danger-text: #ffffff;
+
+  /* Layout Spacing */
+  --header-height: 52px;
+  --split-gap: 18px;
+  --split-padding: 16px;
+  --sidebar-wide-min: 380px;
+  --sidebar-wide-max: 440px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  font-size: 11pt;
+  background: var(--app-window-bg);
+  color: var(--input-text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--app-panel-bg);
+}
+
+/* Header Component */
+#app-header {
+  background: var(--header-bg);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--header-border);
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+}
+
+#app-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--header-title);
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#app-title i {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+#app-subtitle {
+  font-size: 10px;
+  color: var(--header-sub);
+  font-style: italic;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.toolbar-ver {
+  font-size: 8pt;
+  color: var(--header-ver);
+  font-family: Arial, sans-serif;
+  white-space: nowrap;
+  margin-left: 16px;
+  letter-spacing: 0.02em;
+}
 
 /* Split Layout */
-.content{display:flex;flex:1;overflow:hidden;}
-.split-layout{display:grid;grid-template-columns:minmax(360px,440px) 1fr;gap:20px;height:100%;width:100%;overflow:hidden;align-items:stretch;padding:16px;}
-.split-left{height:100%;overflow-y:auto;padding-right:6px;}
-.split-right{height:100%;overflow-y:auto;background:#f9fafc;border:1px solid #d0d7e2;border-radius:8px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:24px;}
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
 
-/* Cards & Option Groups */
-.opt-group{border:1px solid #bbbbbb;border-radius:8px;margin-bottom:14px;overflow:hidden;background:#ffffff;}
-.opt-group-header{background:#f5f5f5;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #cccccc;}
-.opt-group-header-left{display:flex;align-items:center;gap:6px;}
-.opt-group-header i{font-size:14px;color:#666;}
-.opt-group-title{font-size:9pt;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;}
-.opt-group-body{padding:12px;}
+.split-layout {
+  display: grid;
+  grid-template-columns: minmax(var(--sidebar-wide-min), var(--sidebar-wide-max)) 1fr;
+  gap: var(--split-gap);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  align-items: stretch;
+  padding: var(--split-padding);
+}
 
-/* Inputs & Form Elements */
-input[type=text],select{border:1.5px solid #aaaaaa;border-radius:6px;padding:6px 9px;font-size:10pt;font-family:Arial,sans-serif;background:#ffffff;color:#222222;outline:none;transition:border-color .15s,box-shadow .15s;min-width:0;width:100%;box-sizing:border-box;}
-input[type=text]:hover,select:hover{border-color:#777777;}
-input[type=text]:focus,select:focus{border-color:#3266ad;border-width:2px;box-shadow:0 0 0 3px rgba(50,102,173,0.15);}
-.field-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
-.field-row label{font-size:9.5pt;color:#555555;font-weight:600;}
-.field-row input,.field-row select{width:100%;}
-.toggle-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
-.toggle-row label{font-size:10pt;color:#222;cursor:pointer;}
-input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:#3266ad;}
+.split-left {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 6px;
+}
 
-/* Color Picker Component */
-.color-picker-custom{position:relative;display:inline-block;flex-shrink:0;}
-.color-trigger{width:28px;height:20px;border:1px solid #c8d0dc;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;padding:0 2px;background:#fff;}
-.color-trigger .arrow{width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-top:4px solid rgba(0,0,0,0.6);}
-.color-menu{display:none;position:absolute;top:calc(100% + 3px);right:0;z-index:100;background:#fff;border:1px solid #c8d0dc;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:6px;width:122px;}
-.color-menu.open{display:block;}
-.color-palette-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:6px;}
-.color-palette-swatch{width:22px;height:22px;border-radius:3px;cursor:pointer;border:1px solid rgba(0,0,0,0.15);transition:transform 0.05s;}
-.color-palette-swatch:hover{transform:scale(1.15);border-color:#1e2a3a;}
-.custom-hex-btn{width:100%;padding:4px 6px;font-size:10px;font-weight:500;border:1px solid #c8d0dc;border-radius:4px;background:#f4f6f9;cursor:pointer;text-align:center;color:#1e2a3a;display:block;}
-.custom-hex-btn:hover{background:#e5e9f0;}
+.split-right {
+  height: 100%;
+  overflow-y: auto;
+  background: var(--stage-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18px;
+}
 
-/* Gene setup grid */
-.gene-block{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-bottom:10px;}
-.gene-block-title{font-size:9pt;font-weight:700;color:#334155;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
-.allele-def-grid{display:grid;grid-template-columns:85px 1fr;gap:8px;align-items:center;margin-bottom:6px;}
-.allele-def-grid span{font-size:8.5pt;font-weight:600;color:#64748b;}
+/* Opt-Group / Cards */
+.opt-group {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  background: var(--app-panel-bg);
+}
 
-.info-note{font-size:8.5pt;color:#666;margin-top:6px;font-style:italic;}
+.opt-group-header {
+  background: var(--card-header-bg);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--card-header-border);
+}
 
-/* Buttons */
-.btn{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:6px 12px;font-size:9.5pt;font-family:Arial,sans-serif;font-weight:600;cursor:pointer;transition:all .12s;border:none;}
-.btn-primary{background:#3266ad;color:#fff;}
-.btn-primary:hover{background:#185fa5;}
-.btn-green{background:#1a7a3a;color:#fff;}
-.btn-green:hover{background:#145e2c;}
-.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;justify-content:center;}
+.opt-group-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-/* Preview Containers */
-.export-card{background:#ffffff;border:1px solid #d0d7e2;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:center;max-width:100%;}
-.export-card-title{font-size:10pt;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-canvas{max-width:100%;height:auto;display:block;}
-.copy-feedback{font-size:9.5pt;color:#2e7d32;font-weight:600;display:none;align-items:center;gap:4px;margin-top:6px;}
+.opt-group-header i {
+  font-size: 14px;
+  color: var(--card-header-icon);
+}
+
+.opt-group-title {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: var(--card-header-title);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.opt-group-body {
+  padding: 12px;
+}
+
+/* Form Controls */
+input[type=text],
+input[type=number],
+select {
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  color: var(--input-text);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type=text]:hover,
+input[type=number]:hover,
+select:hover {
+  border-color: var(--input-border-hover);
+}
+
+input[type=text]:focus,
+input[type=number]:focus,
+select:focus {
+  border-color: var(--input-border-focus);
+  border-width: 2px;
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.field-row label {
+  font-size: 9.5pt;
+  color: var(--input-label);
+  font-weight: 600;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+
+.toggle-row label {
+  font-size: 10pt;
+  color: var(--input-text);
+  cursor: pointer;
+  user-select: none;
+}
+
+input[type=checkbox] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: var(--btn-primary-bg);
+}
+
+/* Gene Setup Blocks */
+.gene-block {
+  background: var(--card-header-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.gene-block-title {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: var(--card-header-title);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.allele-def-grid {
+  display: grid;
+  grid-template-columns: 85px 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.allele-def-grid span {
+  font-size: 8.5pt;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.info-note {
+  font-size: 8.5pt;
+  color: #64748b;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* Standard Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 9.5pt;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .12s ease-in-out;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary { background: var(--btn-primary-bg); color: var(--btn-primary-text); }
+.btn-primary:hover:not(:disabled) { background: var(--btn-primary-hover); }
+
+.btn-secondary { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); border: 1.5px solid var(--btn-secondary-border); }
+.btn-secondary:hover:not(:disabled) { background: var(--btn-secondary-hover-bg); border-color: var(--btn-secondary-hover-border); }
+
+.btn-green { background: var(--btn-green-bg); color: var(--btn-green-text); }
+.btn-green:hover:not(:disabled) { background: var(--btn-green-hover); }
+
+.btn-danger { background: var(--btn-danger-bg); color: var(--btn-danger-text); }
+.btn-danger:hover:not(:disabled) { background: var(--btn-danger-hover); }
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Stage Cards & Feedback */
+.export-card {
+  background: var(--app-panel-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+}
+
+.export-card-title {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: var(--card-header-title);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.canvas-wrapper {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.feedback-row {
+  min-height: 22px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-feedback {
+  font-size: 9.5pt;
+  color: var(--btn-green-bg);
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Swatch Picker Component */
+.color-picker-custom {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.color-trigger {
+  width: 30px;
+  height: 22px;
+  border: 1px solid #c8d0dc;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 3px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+}
+
+.color-trigger .arrow {
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 4px solid rgba(0,0,0,0.65);
+}
+
+.color-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 100;
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 6px;
+  width: 124px;
+}
+
+.color-menu.open {
+  display: block;
+}
+
+.color-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin-bottom: 6px;
+}
+
+.color-palette-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid rgba(0,0,0,0.15);
+  transition: transform 0.05s;
+}
+
+.color-palette-swatch:hover {
+  transform: scale(1.15);
+  border-color: #1e2a3a;
+}
+
+.custom-hex-btn {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 9.5px;
+  font-weight: 500;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  background: var(--card-header-bg);
+  cursor: pointer;
+  text-align: center;
+  color: var(--input-text);
+  display: block;
+}
+
+.custom-hex-btn:hover {
+  background: #eef3fb;
+}
 </style>
 </head>
 <body>
@@ -81,26 +520,29 @@ canvas{max-width:100%;height:auto;display:block;}
 
   <input type="color" id="hidden-custom-color" style="position:fixed; top:-100px; left:-100px; opacity:0; pointer-events:none;">
 
-  <!-- TOP HEADER -->
-  <div id="app-header">
+  <!-- Standard App Header -->
+  <header id="app-header">
     <div class="header-titles">
-      <div id="app-title">A Humble Punnett Square</div>
+      <div id="app-title"><i class="ti ti-grid-dots"></i> A Humble Punnett Square</div>
       <div id="app-subtitle">A Clean Punnett Square Builder for Biology Teachers &amp; Students &mdash; Built by Steven Humble</div>
     </div>
-    <span class="toolbar-ver">V1.1.0 &mdash; 2026-08-23</span>
-  </div>
+    <div class="toolbar-ver">V 1.1.0 &mdash; 2026-09-16</div>
+  </header>
 
-  <!-- SPLIT CONTENT -->
-  <div class="content">
-    <div class="split-layout">
+  <!-- App Body Layout -->
+  <main class="content">
+    <div class="split-layout wide-sidebar">
       
-      <!-- LEFT PANEL: Controls -->
-      <div class="split-left" id="controls-panel">
+      <!-- Left Panel: Controls -->
+      <aside class="split-left" id="controls-panel">
         
         <!-- Cross Setup -->
         <div class="opt-group">
           <div class="opt-group-header">
-            <div class="opt-group-header-left"><i class="ti ti-adjustments"></i><span class="opt-group-title">Cross Configuration</span></div>
+            <div class="opt-group-header-left">
+              <i class="ti ti-adjustments"></i>
+              <span class="opt-group-title">Cross Configuration</span>
+            </div>
           </div>
           <div class="opt-group-body">
             <div class="field-row">
@@ -174,7 +616,10 @@ canvas{max-width:100%;height:auto;display:block;}
         <!-- Centralized Gene & Phenotype Configuration -->
         <div class="opt-group">
           <div class="opt-group-header">
-            <div class="opt-group-header-left"><i class="ti ti-dna"></i><span class="opt-group-title">Gene &amp; Phenotype Setup</span></div>
+            <div class="opt-group-header-left">
+              <i class="ti ti-dna"></i>
+              <span class="opt-group-title">Gene &amp; Phenotype Setup</span>
+            </div>
           </div>
           <div class="opt-group-body">
             <div id="geneConfigContainer"></div>
@@ -193,15 +638,18 @@ canvas{max-width:100%;height:auto;display:block;}
         <!-- Parent 1 Selection -->
         <div class="opt-group">
           <div class="opt-group-header">
-            <div class="opt-group-header-left"><i class="ti ti-user"></i><span class="opt-group-title" id="p1GroupTitle">Parent 1 (Top Axis)</span></div>
+            <div class="opt-group-header-left">
+              <i class="ti ti-user"></i>
+              <span class="opt-group-title" id="p1GroupTitle">Parent 1 (Top Axis)</span>
+            </div>
             <div style="display:flex;align-items:center;gap:6px;">
-              <span style="font-size:8.5pt;color:#555;font-weight:600;">Color:</span>
+              <span style="font-size:8.5pt;color:var(--input-label);font-weight:600;">Color:</span>
               <div id="p1ColorPickerWrap"></div>
             </div>
           </div>
           <div class="opt-group-body">
             <div class="field-row" style="margin-bottom:8px;">
-              <label style="font-size:8.5pt;color:#666;">Parent 1 Label (Printed Top)</label>
+              <label style="font-size:8.5pt;color:var(--input-label);">Parent 1 Label (Printed Top)</label>
               <input type="text" id="p1CustomLabel" oninput="triggerLiveUpdate()">
             </div>
             <div id="p1SelectorsContainer"></div>
@@ -211,15 +659,18 @@ canvas{max-width:100%;height:auto;display:block;}
         <!-- Parent 2 Selection -->
         <div class="opt-group">
           <div class="opt-group-header">
-            <div class="opt-group-header-left"><i class="ti ti-user"></i><span class="opt-group-title" id="p2GroupTitle">Parent 2 (Left Axis)</span></div>
+            <div class="opt-group-header-left">
+              <i class="ti ti-user"></i>
+              <span class="opt-group-title" id="p2GroupTitle">Parent 2 (Left Axis)</span>
+            </div>
             <div style="display:flex;align-items:center;gap:6px;">
-              <span style="font-size:8.5pt;color:#555;font-weight:600;">Color:</span>
+              <span style="font-size:8.5pt;color:var(--input-label);font-weight:600;">Color:</span>
               <div id="p2ColorPickerWrap"></div>
             </div>
           </div>
           <div class="opt-group-body">
             <div class="field-row" style="margin-bottom:8px;">
-              <label style="font-size:8.5pt;color:#666;">Parent 2 Label (Printed Left)</label>
+              <label style="font-size:8.5pt;color:var(--input-label);">Parent 2 Label (Printed Left)</label>
               <input type="text" id="p2CustomLabel" oninput="triggerLiveUpdate()">
             </div>
             <div id="p2SelectorsContainer"></div>
@@ -229,7 +680,10 @@ canvas{max-width:100%;height:auto;display:block;}
         <!-- Solution Breakdown Options -->
         <div class="opt-group">
           <div class="opt-group-header">
-            <div class="opt-group-header-left"><i class="ti ti-table"></i><span class="opt-group-title">Solution Table Options</span></div>
+            <div class="opt-group-header-left">
+              <i class="ti ti-table"></i>
+              <span class="opt-group-title">Solution Table Options</span>
+            </div>
           </div>
           <div class="opt-group-body">
             <div class="toggle-row">
@@ -259,56 +713,64 @@ canvas{max-width:100%;height:auto;display:block;}
           </div>
         </div>
 
-      </div>
+      </aside>
 
-      <!-- RIGHT PANEL: Distinct Preview Cards -->
-      <div class="split-right">
+      <!-- Right Panel: Stage Cards -->
+      <section class="split-right" id="stage-panel">
         
-        <!-- CARD 1: Punnett Square Canvas -->
+        <!-- Card 1: Punnett Square Canvas -->
         <div class="export-card" id="squareCard">
           <div class="export-card-title"><i class="ti ti-grid-dots"></i> Punnett Square</div>
-          <canvas id="punnettCanvas"></canvas>
+          <div class="canvas-wrapper">
+            <canvas id="punnettCanvas"></canvas>
+          </div>
           <div class="btn-row">
             <button class="btn btn-primary" onclick="downloadSquare()"><i class="ti ti-download"></i> Download PNG</button>
             <button class="btn btn-green" id="copySquareBtn" onclick="copySquare()"><i class="ti ti-copy"></i> Copy Square</button>
           </div>
-          <span class="copy-feedback" id="squareFeedback"><i class="ti ti-check"></i> Copied square to clipboard!</span>
+          <div class="feedback-row">
+            <span class="copy-feedback" id="squareFeedback"><i class="ti ti-check"></i> Copied square to clipboard!</span>
+          </div>
         </div>
 
-        <!-- CARD 2: Solution Table Canvas -->
+        <!-- Card 2: Solution Table Canvas -->
         <div class="export-card" id="solutionCard">
           <div class="export-card-title"><i class="ti ti-list-details"></i> Solution Breakdown</div>
-          <canvas id="solutionCanvas"></canvas>
+          <div class="canvas-wrapper">
+            <canvas id="solutionCanvas"></canvas>
+          </div>
           <div class="btn-row">
             <button class="btn btn-primary" onclick="downloadSolution()"><i class="ti ti-download"></i> Download PNG</button>
             <button class="btn btn-green" id="copySolutionBtn" onclick="copySolution()"><i class="ti ti-copy"></i> Copy Solution</button>
           </div>
-          <span class="copy-feedback" id="solutionFeedback"><i class="ti ti-check"></i> Copied solution to clipboard!</span>
+          <div class="feedback-row">
+            <span class="copy-feedback" id="solutionFeedback"><i class="ti ti-check"></i> Copied solution to clipboard!</span>
+          </div>
         </div>
 
-      </div>
+      </section>
 
     </div>
-  </div>
+  </main>
 </div>
 
 <script>
 'use strict';
 let debounceTimer = null;
 
-const PRESET_COLORS = [
-  { name: 'Navy / Blue',     value: '#0072B2' },
-  { name: 'Orange',          value: '#E69F00' },
-  { name: 'Bluish Green',    value: '#009E73' },
-  { name: 'Vermilion',       value: '#D55E00' },
-  { name: 'Sky Blue',        value: '#56B4E9' },
-  { name: 'Reddish Purple',  value: '#CC79A7' },
-  { name: 'Darkened Gold',   value: '#E5C494' },
-  { name: 'Charcoal Slate',  value: '#4A5568' }
+const OKABE_ITO_PALETTE = [
+  { name: 'Navy / Blue',     hex: '#0072B2' },
+  { name: 'Orange',          hex: '#E69F00' },
+  { name: 'Bluish Green',    hex: '#009E73' },
+  { name: 'Vermilion',       hex: '#D55E00' },
+  { name: 'Sky Blue',        hex: '#56B4E9' },
+  { name: 'Reddish Purple',  hex: '#CC79A7' },
+  { name: 'Darkened Gold',   hex: '#E5C494' },
+  { name: 'Charcoal Slate',  hex: '#4A5568' }
 ];
 
-let p1Color = '#3266ad';
-let p2Color = '#3266ad';
+let p1Color = '#0072B2';
+let p2Color = '#D55E00';
 
 let pendingColorCallback = null;
 const hiddenColorInput = document.getElementById('hidden-custom-color');
@@ -332,7 +794,7 @@ function createColorSelect(currentColor, onChangeCallback) {
   trigger.type = 'button';
   trigger.className = 'color-trigger';
   trigger.style.backgroundColor = currentColor;
-  trigger.title = 'Change color';
+  trigger.title = 'Choose color';
 
   const arrow = document.createElement('span');
   arrow.className = 'arrow';
@@ -344,16 +806,16 @@ function createColorSelect(currentColor, onChangeCallback) {
   const grid = document.createElement('div');
   grid.className = 'color-palette-grid';
 
-  PRESET_COLORS.forEach(c => {
+  OKABE_ITO_PALETTE.forEach(c => {
     const swatch = document.createElement('div');
     swatch.className = 'color-palette-swatch';
-    swatch.style.backgroundColor = c.value;
+    swatch.style.backgroundColor = c.hex;
     swatch.title = c.name;
     swatch.onclick = (e) => {
       e.stopPropagation();
       menu.classList.remove('open');
-      trigger.style.backgroundColor = c.value;
-      onChangeCallback(c.value);
+      trigger.style.backgroundColor = c.hex;
+      onChangeCallback(c.hex);
     };
     grid.appendChild(swatch);
   });
@@ -369,7 +831,7 @@ function createColorSelect(currentColor, onChangeCallback) {
       trigger.style.backgroundColor = newHex;
       onChangeCallback(newHex);
     };
-    hiddenColorInput.value = currentColor.startsWith('#') && currentColor.length === 7 ? currentColor : '#3266ad';
+    hiddenColorInput.value = currentColor.startsWith('#') && currentColor.length === 7 ? currentColor : '#0072B2';
     hiddenColorInput.click();
   };
 
@@ -855,7 +1317,6 @@ function evaluateSingleLocusCustom(pairUnits, pattern, isSexLinked, prefix) {
         return isHomoLower ? (customRec || 'Trait 2 Expressed') : (customDom || 'Trait 1 Expressed');
       }
 
-      // Sex-Linked Complete Dominance
       if (isXDomMode) {
         if (isHomoUpper || isHetero) return customRec || 'Affected';
         return customDom || 'Unaffected';
@@ -867,7 +1328,6 @@ function evaluateSingleLocusCustom(pairUnits, pattern, isSexLinked, prefix) {
     }
   }
 
-  // Autosomal
   const b1 = u1.base || u1.raw;
   const b2 = u2.base || u2.raw;
   const s1 = u1.script, s2 = u2.script;
@@ -1054,14 +1514,12 @@ function renderAll() {
   const headerSize = isDi ? 64 : 75;
   const squareDim = headerSize + (gridSize * cellSize);
 
-  // Groupings
   const genoGroups = { all: {}, female: {}, male: {} };
   const phenoCombined = { all: {}, female: {}, male: {} };
   const trait1Phenos = { all: {}, female: {}, male: {} };
   const trait2Phenos = { all: {}, female: {}, male: {} };
   const total = gridSize * gridSize;
 
-  // Zero matrix population
   if (showZero) {
     if (!isDi) {
       const list = getTheoreticalLocusPhenotypes(monoPattern, monoSex, 'gMono');
@@ -1154,7 +1612,7 @@ function renderAll() {
     }
   }
 
-  // 1. RENDER PUNNETT SQUARE CANVAS
+  // 1. Render Punnett Square Canvas
   const pCanvas = document.getElementById('punnettCanvas');
   const pCtx = pCanvas.getContext('2d');
   
@@ -1222,10 +1680,9 @@ function renderAll() {
     pCtx.restore();
   }
 
-  // Separator Dotted Extensions
   if (showSeparator) {
     pCtx.save();
-    pCtx.strokeStyle = '#888888';
+    pCtx.strokeStyle = '#94a3b8';
     pCtx.lineWidth = 1.5;
     pCtx.setLineDash([4, 3]);
 
@@ -1279,7 +1736,6 @@ function renderAll() {
     }
   }
 
-  // Trait Key Box strictly to the RIGHT
   if (traitEntries.length > 0) {
     pCtx.save();
     const kx = ox + squareDim + 16;
@@ -1319,7 +1775,7 @@ function renderAll() {
     pCtx.restore();
   }
 
-  // 2. RENDER SEPARATE SOLUTION BREAKDOWN CANVAS
+  // 2. Render Solution Breakdown Canvas
   if (showSolution) {
     const sCanvas = document.getElementById('solutionCanvas');
     const sCtx = sCanvas.getContext('2d');
@@ -1372,13 +1828,13 @@ function renderAll() {
       sCtx.fillText(title, tx, ty);
       ty += 8;
 
-      sCtx.fillStyle = '#f5f5f5';
+      sCtx.fillStyle = '#f8fafc';
       sCtx.fillRect(tx, ty, tableWidth, rowH);
-      sCtx.strokeStyle = '#cccccc';
+      sCtx.strokeStyle = '#e2e8f0';
       sCtx.lineWidth = 1;
       sCtx.strokeRect(tx, ty, tableWidth, rowH);
 
-      sCtx.fillStyle = '#555555';
+      sCtx.fillStyle = '#475569';
       sCtx.font = 'bold 10px system-ui, -apple-system, sans-serif';
       sCtx.textBaseline = 'middle';
       sCtx.fillText('Class / Trait', tx + 8, ty + (rowH / 2));
@@ -1388,7 +1844,7 @@ function renderAll() {
     }
 
     function renderRow(tokensOrStr, count, isTokens = false) {
-      sCtx.strokeStyle = '#eeeeee';
+      sCtx.strokeStyle = '#e2e8f0';
       sCtx.lineWidth = 1;
       sCtx.strokeRect(tx, ty, tableWidth, rowH);
       sCtx.textBaseline = 'middle';
@@ -1396,13 +1852,13 @@ function renderAll() {
       if (isTokens) {
         drawTokens(sCtx, tokensOrStr, tx + 24, ty + (rowH / 2), 12.5, '#1e2a3a');
       } else {
-        sCtx.fillStyle = '#222222';
+        sCtx.fillStyle = '#1e2a3a';
         sCtx.font = '10px system-ui, -apple-system, sans-serif';
         sCtx.textAlign = 'left';
         sCtx.fillText(tokensOrStr, tx + 8, ty + (rowH / 2));
       }
 
-      sCtx.fillStyle = '#333333';
+      sCtx.fillStyle = '#334155';
       sCtx.font = '11px monospace, sans-serif';
       sCtx.textAlign = 'left';
       sCtx.fillText(`${count}/${total}`, tx + colW1 + 8, ty + (rowH / 2));
@@ -1410,7 +1866,6 @@ function renderAll() {
       ty += rowH;
     }
 
-    // Genotypes
     if (showGenos) {
       if (useSexStratified) {
         renderHeader('Genotypes: Female Offspring (XX)');
@@ -1426,7 +1881,6 @@ function renderAll() {
       }
     }
 
-    // Individual Traits for Dihybrid
     if (showIndiv && isDi) {
       if (diSex1 && groupBySexOpt) {
         renderHeader('Trait 1 (Gene 1): Female Offspring');
@@ -1461,7 +1915,6 @@ function renderAll() {
       }
     }
 
-    // Combined Phenotypes
     if (showPhenos) {
       if (useSexStratified) {
         renderHeader('Combined Phenotypes: Female Offspring (XX)');
@@ -1484,63 +1937,52 @@ function renderAll() {
 /* --- EXPORT HANDLERS --- */
 function getTimestamp() {
   const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const pad = n => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
-function downloadSquare() {
-  const canvas = document.getElementById('punnettCanvas');
+function downloadPNG(canvasId = 'punnettCanvas', filePrefix = 'Punnett_Square') {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
   const a = document.createElement('a');
-  a.download = `Punnett_Square_${getTimestamp()}.png`;
+  a.download = `${filePrefix}_${getTimestamp()}.png`;
   a.href = canvas.toDataURL('image/png');
   a.click();
 }
 
-async function copyCanvasDirect(canvas, btn, feedback) {
+async function copyPNG(canvasId, btnId, feedbackId) {
+  const canvas = document.getElementById(canvasId);
+  const btn = document.getElementById(btnId);
+  const fb = document.getElementById(feedbackId);
+  if (!canvas) return;
+
   try {
     const blob = await new Promise((resolve, reject) => {
       canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png');
     });
-    
+
     if (navigator.clipboard && window.ClipboardItem) {
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      feedback.style.display = 'inline-flex';
+      fb.style.display = 'inline-flex';
+      const origBg = btn.style.background;
       btn.style.background = '#145e2c';
+
       setTimeout(() => {
-        feedback.style.display = 'none';
-        btn.style.background = '#1a7a3a';
+        fb.style.display = 'none';
+        btn.style.background = origBg || '#1a7a3a';
       }, 2500);
       return;
     }
     throw new Error('Clipboard API unavailable');
   } catch (err) {
-    const a = document.createElement('a');
-    a.download = `Punnett_${canvas.id === 'punnettCanvas' ? 'Square' : 'Solution'}_${getTimestamp()}.png`;
-    a.href = canvas.toDataURL('image/png');
-    a.click();
+    downloadPNG(canvasId, canvasId === 'punnettCanvas' ? 'Punnett_Square' : 'Punnett_Solution');
   }
 }
 
-function copySquare() {
-  const canvas = document.getElementById('punnettCanvas');
-  const btn = document.getElementById('copySquareBtn');
-  const fb = document.getElementById('squareFeedback');
-  copyCanvasDirect(canvas, btn, fb);
-}
-
-function downloadSolution() {
-  const canvas = document.getElementById('solutionCanvas');
-  const a = document.createElement('a');
-  a.download = `Punnett_Solution_${getTimestamp()}.png`;
-  a.href = canvas.toDataURL('image/png');
-  a.click();
-}
-
-function copySolution() {
-  const canvas = document.getElementById('solutionCanvas');
-  const btn = document.getElementById('copySolutionBtn');
-  const fb = document.getElementById('solutionFeedback');
-  copyCanvasDirect(canvas, btn, fb);
-}
+function downloadSquare() { downloadPNG('punnettCanvas', 'Punnett_Square'); }
+function copySquare() { copyPNG('punnettCanvas', 'copySquareBtn', 'squareFeedback'); }
+function downloadSolution() { downloadPNG('solutionCanvas', 'Punnett_Solution'); }
+function copySolution() { copyPNG('solutionCanvas', 'copySolutionBtn', 'solutionFeedback'); }
 
 window.onload = () => {
   initColorPickers();
